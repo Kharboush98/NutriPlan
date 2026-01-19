@@ -1,5 +1,9 @@
 const ApiKey = "JQRhnqJnS38nx69on4EPGXsLuPyJHmqZmpTRWhes";
 
+const spinnerHTML = `<div class="flex items-center justify-center py-12">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+                    </div>`;
+
 //Main Menu Btns
 const navLinks = document.querySelectorAll(".nav-link");
 const allSections = document.querySelectorAll(".pageSection");
@@ -11,16 +15,44 @@ const listBtn = document.getElementById("list-view-btn");
 const container = document.getElementById("recipes-grid");
 const recipeCards = document.querySelectorAll(".recipe-card");
 
-const spinnerHTML = `<div class="flex items-center justify-center py-12">
-                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
-                    </div>`;
+//Main Menu 1: Meals and Recipes:- 
+let searchBar = document.getElementById("search-input");
 
-let loggedItem = document.getElementById("logged-items-list");
+let recipesCount = document.getElementById("recipes-count");
+let recipesGrid = document.getElementById("recipes-grid");
+
+let areaGrid = document.getElementById("search-area");
+let categoriesGrid = document.getElementById("categories-grid");
+
+let heroSection = document.getElementById("hero-section");
+let actionSection = document.getElementById("action-section");
+let IngredientsSection = document.getElementById("Ingredients-section");
+let InstructionSection = document.getElementById("Instruction-section");
+let VideoSection = document.getElementById("video-section");
+let nutritionSection = document.getElementById("nutrition-section");
+
+// let logMealBtn = document.getElementById("log-meal-btn");
+
+// product scanner // Menu 2
+let productSearchInput = document.getElementById("product-search-input");
+let productSearchBtn = document.getElementById("search-product-btn");
+
+let barCodeSearchInput = document.getElementById("barcode-input");
+let barCodeSearchBtn = document.getElementById("lookup-barcode-btn");
+
+let productsGrid = document.getElementById("products-grid");
+let clearFoodLogBtn = document.getElementById("clear-foodlog");
+
+
+// logged items // Menu 3
 let progressBar = document.getElementById("progressBar");
+let loggedItem = document.getElementById("logged-items-list");
+let loggedItemHeader = document.getElementById("logged-items-head");
 
-let productModal = document.getElementById("product-detail-modal");
+// let productModal = document.getElementById("product-detail-modal");
 
-var foodList;
+let foodList;
+
 if(localStorage.getItem("foodList")){
     foodList = JSON.parse(localStorage.getItem("foodList"));
     displayLoggedCards(foodList);
@@ -71,7 +103,7 @@ document.addEventListener("DOMContentLoaded", () => {
             hideAllSections();
 
             // document.getElementById("product-detail-modal").style.display = "none";
-            productModal.style.display = "none";
+            // productModal.style.display = "none";
 
             // Remove active Telwind styles from all
             navLinks.forEach(_link => {
@@ -103,24 +135,6 @@ document.addEventListener("DOMContentLoaded", () => {
     showMealsPage();
 });
 
-
-//Main Menu 1: Meals and Recipes:- 
-let searchBar = document.getElementById("search-input");
-
-let recipesCount = document.getElementById("recipes-count");
-let recipesGrid = document.getElementById("recipes-grid");
-
-let areaGrid = document.getElementById("search-area");
-let categoriesGrid = document.getElementById("categories-grid");
-
-let heroSection = document.getElementById("hero-section");
-let actionSection = document.getElementById("action-section");
-let IngredientsSection = document.getElementById("Ingredients-section");
-let InstructionSection = document.getElementById("Instruction-section");
-let VideoSection = document.getElementById("video-section");
-let nutritionSection = document.getElementById("nutrition-section");
-
-// let logMealBtn = document.getElementById("log-meal-btn");
 
 //Grid
 gridBtn.addEventListener("click", () => {
@@ -156,23 +170,7 @@ listBtn.addEventListener("click", () => {
     gridBtn.classList.remove("bg-white", "shadow-sm");
 });
 
-// document.querySelectorAll(".recipe-card").forEach(card => {
-//   card.addEventListener("click", () => {
-
-//     window.scrollTo({
-//         top: 0,
-//         behavior: "smooth"
-//     });
-
-//     document.getElementById("search-filters-section").style.display = "none";
-//     document.getElementById("meal-categories-section").style.display = "none";
-//     document.getElementById("all-recipes-section").style.display = "none";
-
-//     // Show details section
-//     document.getElementById("meal-details").style.display = "block";
-//   });
-// });
-
+//Click on the reciepe from Menu 1
 recipesGrid.addEventListener("click", async (e) => {
   const card = e.target.closest(".recipe-card");
   if (!card) return;
@@ -190,6 +188,20 @@ recipesGrid.addEventListener("click", async (e) => {
   await getMealDetails(mealId);
 });
 
+//Get Meal details and display Them
+async function getMealDetails(id)
+{
+    var res = await fetch(`https://nutriplan-api.vercel.app/api/meals/${id}`);
+    res = await res.json();
+
+    // console.log(res.result);
+    
+    let nutrition = createRecipeData1(res.result);
+    analyzeAndDisplayRecipe(nutrition);
+
+    displayAllMealDetails(res.result , nutrition);
+}
+
 function createRecipeData1(res) {
     let title = res.name;
     let ingredients = [];
@@ -199,33 +211,10 @@ function createRecipeData1(res) {
         ingredients.push(res.ingredients[i].ingredient);
     }
 
-    return createRecipeData(title, ingredients);
-}
-
-function createRecipeData(recipeName, ingredientsArray) {
     return {
-        title: recipeName,
-        ingredients: ingredientsArray
-    };
-}
-
-async function getMealDetails(id)
-{
-    var res = await fetch(`https://nutriplan-api.vercel.app/api/meals/${id}`);
-    res = await res.json();
-
-    console.log(res.result);
-    
-    // console.log("meal: " , res.result);
-    
-    
-    let nutrition = createRecipeData1(res.result);
-    console.log(nutrition);
-    
-    analyzeAndDisplayRecipe(nutrition);
-
-
-    displayAllMealDetails(res.result , nutrition);
+        title,
+        ingredients
+    }
 }
 
 function displayAllMealDetails(meal, nutrition)
@@ -320,7 +309,6 @@ function displayActionSection(meal , nutrition)
     });
 }
 
-
 function logMeal(meal , nutrition)
 {
     var newMeal = {
@@ -340,7 +328,6 @@ function logMeal(meal , nutrition)
     displayProgressBar(foodList);
     saveToLocalStorage(foodList);
 }
-
 
 function displayAllIngereidianets(ingArr)
 {
@@ -576,12 +563,9 @@ document.getElementById("back-to-meals-btn").addEventListener("click", () => {
 async function searchRecipes()
 {
     let searchVal = searchBar.value.toLowerCase();
-    // console.log(searchVal);
 
     let res = await fetch(`https://nutriplan-api.vercel.app/api/meals/search?q=${searchVal}&page=1&limit=25`);
     res = await res.json();
-
-    // console.log(res.results);
     
     displayMeals(res.results);
 }
@@ -592,7 +576,6 @@ async function getAreas()
     var res = await fetch(`https://nutriplan-api.vercel.app/api/meals/areas`);
     res = await res.json();
     
-    // console.log(res.results);
     displayAreas(res.results);
 }
 
@@ -631,7 +614,6 @@ areaGrid.addEventListener("click", (e) => {
     const area = button .dataset.area;
 
     if (area === "All") {
-        // console.log("all");
         // getRandMeals();
         getMeals();
     }
@@ -645,7 +627,6 @@ async function getMealsByArea(area) {
     var res = await fetch(`https://nutriplan-api.vercel.app/api/meals/filter?area=${area}&page=1&limit=25`);
     res = await res.json();
 
-    // console.log(res.results);
     displayMeals(res.results , area);
 }
 
@@ -654,12 +635,10 @@ async function getRandMeals()
     var res = await fetch(`https://nutriplan-api.vercel.app/api/meals/random?count=25`);
     res = await res.json();
 
-    // console.log(res.results);
     displayMeals(res.results);
 }
 
 //category search
-
 async function getCategories()
 {
     var res = await fetch(`https://nutriplan-api.vercel.app/api/meals/categories`);
@@ -783,18 +762,6 @@ function displayMeals(arr , cat = "")
 }
 
 
-
-// product scanner
-
-let productSearchInput = document.getElementById("product-search-input");
-let productSearchBtn = document.getElementById("search-product-btn");
-
-let barCodeSearchInput = document.getElementById("barcode-input");
-let barCodeSearchBtn = document.getElementById("lookup-barcode-btn");
-
-let productsGrid = document.getElementById("products-grid");
-
-
 // ----> Search by product name
 async function SearchProduct(searchVal) {
     // let searchVal = searchBar.value.toLowerCase();
@@ -838,7 +805,6 @@ barCodeSearchInput.addEventListener("keydown", (e) => {
         barCodeSearchBtn.click();
     }
 });
-
 
 
 // ----> Display product
@@ -1029,8 +995,6 @@ async function searchNutritionOf(foodID) {
     console.log(res.result);
 }
 
-let NutritionValues;
-
 async function analyzeAndDisplayRecipe(recipe) {
     nutritionSection.innerHTML = spinnerHTML;
 
@@ -1090,65 +1054,23 @@ function deleteLoggedCards(index)
     saveToLocalStorage(foodList);
 }
 
-function displayLoggedCards(foodList)
+function deleteAllLoggedCards()
 {
-    if(foodList.length > 0)
-    {
-        box = "";
-        for (let i = 0; i < foodList.length; i++) {
-            box += 
-            `
-                <div class="flex items-center justify-between bg-gray-50 rounded-xl p-4 hover:bg-gray-100 transition-all">
-                    <div class="flex items-center gap-4">
-                        <img src="${foodList[i].img}"
-                            alt="${foodList[i].name}"
-                            class="w-14 h-14 rounded-xl object-cover">
-                        </img>
-                        <div>
-                            <p class="font-semibold text-gray-900">${foodList[i].name}</p>
-                            <p class="text-sm text-gray-500">
-                                ${foodList[i].serving} serving
-                                <span class="mx-1">•</span>
-                                <span class="text-emerald-600">Recipe</span>
-                            </p>
-                            <p class="text-xs text-gray-400 mt-1">4:49 PM</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <div class="text-right">
-                            <p class="text-lg font-bold text-emerald-600">${foodList[i].calories}</p>
-                            <p class="text-xs text-gray-500">kcal</p>
-                        </div>
-                        <div class="hidden md:flex gap-2 text-xs text-gray-500">
-                            <span class="px-2 py-1 bg-blue-50 rounded">32g P</span>
-                            <span class="px-2 py-1 bg-amber-50 rounded">240g C</span>
-                            <span class="px-2 py-1 bg-purple-50 rounded">45g F</span>
-                        </div>
-                        <button class="remove-foodlog-item text-gray-400 hover:text-red-500 transition-all p-2" data-index="${i}">
-                            <i data-fa-i2svg=""><svg class="svg-inline--fa fa-trash-can" data-prefix="fas" data-icon="trash-can" role="img" viewBox="0 0 448 512" aria-hidden="true" data-fa-i2svg=""><path fill="currentColor" d="M136.7 5.9C141.1-7.2 153.3-16 167.1-16l113.9 0c13.8 0 26 8.8 30.4 21.9L320 32 416 32c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 96C14.3 96 0 81.7 0 64S14.3 32 32 32l96 0 8.7-26.1zM32 144l384 0 0 304c0 35.3-28.7 64-64 64L96 512c-35.3 0-64-28.7-64-64l0-304zm88 64c-13.3 0-24 10.7-24 24l0 192c0 13.3 10.7 24 24 24s24-10.7 24-24l0-192c0-13.3-10.7-24-24-24zm104 0c-13.3 0-24 10.7-24 24l0 192c0 13.3 10.7 24 24 24s24-10.7 24-24l0-192c0-13.3-10.7-24-24-24zm104 0c-13.3 0-24 10.7-24 24l0 192c0 13.3 10.7 24 24 24s24-10.7 24-24l0-192c0-13.3-10.7-24-24-24z"></path></svg></i>
-                        </button>
-                    </div>
-                </div>
-            `
-            loggedItem.innerHTML = box;
-        }
-    }
-    else {
-        loggedItem.innerHTML = 
-        `
-            <div class="text-center py-8 text-gray-500">
-                  <i
-                    class="fa-solid fa-utensils text-4xl mb-3 text-gray-300"
-                  ></i>
-                  <p class="font-medium">No meals logged today</p>
-                  <p class="text-sm">
-                    Add meals from the Meals page or scan products
-                  </p>
-            </div>
-        `
-    }
+    foodList.length = 0;
+
+    displayLoggedCards(foodList);
+    displayProgressBar(foodList);
+    saveToLocalStorage(foodList);
 }
 
+//delete all btn event
+document.addEventListener("click", (e) => {
+    if (e.target.closest("#clear-foodlog")) {
+            deleteAllLoggedCards();
+    }
+});
+
+//remove item from list btn event
 loggedItem.addEventListener("click", (e) => {
     const btn = e.target.closest(".remove-foodlog-item");
     if (!btn) return;
@@ -1238,3 +1160,75 @@ function displayProgressBar(foodList)
     progressBar.innerHTML = box;
 }
 
+function displayLoggedCards(foodList)
+{
+    loggedItemHeader.innerHTML = 
+        `
+            <h4 class="text-sm font-semibold text-gray-700">
+                  Logged Items (${foodList.length})
+            </h4>
+            <button
+                  id="clear-foodlog"
+                  class="text-red-500 hover:text-red-600 text-sm font-medium"
+                  style="display: block"
+                >
+                  <i class="fa-solid fa-trash mr-1"></i>Clear All
+            </button>
+        `;
+
+    if(foodList.length > 0)
+    {
+        box = "";
+        for (let i = 0; i < foodList.length; i++) {
+            box += 
+            `
+                <div class="flex items-center justify-between bg-gray-50 rounded-xl p-4 hover:bg-gray-100 transition-all">
+                    <div class="flex items-center gap-4">
+                        <img src="${foodList[i].img}"
+                            alt="${foodList[i].name}"
+                            class="w-14 h-14 rounded-xl object-cover">
+                        </img>
+                        <div>
+                            <p class="font-semibold text-gray-900">${foodList[i].name}</p>
+                            <p class="text-sm text-gray-500">
+                                ${foodList[i].serving} serving
+                                <span class="mx-1">•</span>
+                                <span class="text-emerald-600">Recipe</span>
+                            </p>
+                            <p class="text-xs text-gray-400 mt-1">4:49 PM</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="text-right">
+                            <p class="text-lg font-bold text-emerald-600">${foodList[i].calories}</p>
+                            <p class="text-xs text-gray-500">kcal</p>
+                        </div>
+                        <div class="hidden md:flex gap-2 text-xs text-gray-500">
+                            <span class="px-2 py-1 bg-blue-50 rounded">32g P</span>
+                            <span class="px-2 py-1 bg-amber-50 rounded">240g C</span>
+                            <span class="px-2 py-1 bg-purple-50 rounded">45g F</span>
+                        </div>
+                        <button class="remove-foodlog-item text-gray-400 hover:text-red-500 transition-all p-2" data-index="${i}">
+                            <i data-fa-i2svg=""><svg class="svg-inline--fa fa-trash-can" data-prefix="fas" data-icon="trash-can" role="img" viewBox="0 0 448 512" aria-hidden="true" data-fa-i2svg=""><path fill="currentColor" d="M136.7 5.9C141.1-7.2 153.3-16 167.1-16l113.9 0c13.8 0 26 8.8 30.4 21.9L320 32 416 32c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 96C14.3 96 0 81.7 0 64S14.3 32 32 32l96 0 8.7-26.1zM32 144l384 0 0 304c0 35.3-28.7 64-64 64L96 512c-35.3 0-64-28.7-64-64l0-304zm88 64c-13.3 0-24 10.7-24 24l0 192c0 13.3 10.7 24 24 24s24-10.7 24-24l0-192c0-13.3-10.7-24-24-24zm104 0c-13.3 0-24 10.7-24 24l0 192c0 13.3 10.7 24 24 24s24-10.7 24-24l0-192c0-13.3-10.7-24-24-24zm104 0c-13.3 0-24 10.7-24 24l0 192c0 13.3 10.7 24 24 24s24-10.7 24-24l0-192c0-13.3-10.7-24-24-24z"></path></svg></i>
+                        </button>
+                    </div>
+                </div>
+            `
+            loggedItem.innerHTML = box;
+        }
+    }
+    else {
+        loggedItem.innerHTML = 
+        `
+            <div class="text-center py-8 text-gray-500">
+                  <i
+                    class="fa-solid fa-utensils text-4xl mb-3 text-gray-300"
+                  ></i>
+                  <p class="font-medium">No meals logged today</p>
+                  <p class="text-sm">
+                    Add meals from the Meals page or scan products
+                  </p>
+            </div>
+        `
+    }
+}
