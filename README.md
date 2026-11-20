@@ -1,6 +1,6 @@
-# NutriPlan - JavaScript Starter Project
+# NutriPlan - JavaScript Project
 
-Welcome to the NutriPlan starter project! The design is fully complete - your task is to bring it to life with JavaScript.
+Welcome to the NutriPlan project! The design is fully complete - your task is to bring it to life with JavaScript.
 
 ## 🎯 Project Overview
 
